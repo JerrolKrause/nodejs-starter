@@ -1,5 +1,5 @@
 import { Models } from '$models';
-import { Router } from 'express';
+import { Request, Router } from 'express';
 
 let todos: Models.Todo[] = [];
 
@@ -10,14 +10,18 @@ todoRoutes.get('/todo', (_req, res, _next) => {
   res.status(200).json({ todos });
 });
 
-/** POST */
-todoRoutes.post('/todo', (req, res, _next) => {
+/** POST */ //  res: Response<Partial<Models.Todo>>
+todoRoutes.post('/todo', (req: Request<{}, {}, Models.Todo>, res, _next) => {
   const newTodo: Models.Todo = {
     id: new Date().toISOString(),
     text: req.body.text,
   };
-  todos.push(newTodo);
-  res.status(201).json({ id: newTodo.id });
+  try {
+    todos.push(newTodo);
+    return res.status(201).json({ id: newTodo.id });
+  } catch (error) {
+    return res.status(404).json({ message: 'Could not find TODO for this id' });
+  }
 });
 
 /** PUT */
