@@ -1,6 +1,6 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
-# Secure
+# Stuff you don't want in the repo
 src/env/_keys.env.ts
 
 # bitsource
