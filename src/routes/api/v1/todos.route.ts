@@ -2,6 +2,7 @@ import { Models } from '$models';
 import { Request, Router } from 'express';
 
 const route = '/todo';
+const primaryKey = 'id';
 
 let todos: Models.Todo[] = [];
 
@@ -9,7 +10,7 @@ export const todoRoutes = Router();
 
 /** GET */
 todoRoutes.get(route, (_req, res, _next) => {
-  res.status(200).json({ todos });
+  res.status(200).json(todos);
 });
 
 /** POST */ //  res: Response<Partial<Models.Todo>>
@@ -27,8 +28,8 @@ todoRoutes.post(route, (req: Request<{}, {}, Models.Todo>, res, _next) => {
 });
 
 /** PUT */
-todoRoutes.put(`${route}/:todoId`, (req, res, _next) => {
-  const id = req.params.todoId;
+todoRoutes.put(`${route}/:${primaryKey}`, (req, res, _next) => {
+  const id = req.params[primaryKey];
 
   const todoIndex = todos.findIndex(t => t.id === id);
 
@@ -44,8 +45,8 @@ todoRoutes.put(`${route}/:todoId`, (req, res, _next) => {
 });
 
 /** DELETE */
-todoRoutes.delete(`${route}/:todoId`, (req, res, _next) => {
-  const id = req.params.todoId;
+todoRoutes.delete(`${route}/:${primaryKey}`, (req, res, _next) => {
+  const id = req.params[primaryKey];
   const todoIndex = todos.findIndex(t => t.id === id);
   if (todoIndex >= 0 && todos[todoIndex]?.id) {
     todos = todos.filter(t => t.id !== id);
