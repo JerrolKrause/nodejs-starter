@@ -1,17 +1,19 @@
 import { Models } from '$models';
 import { Request, Router } from 'express';
 
+const route = '/todo';
+
 let todos: Models.Todo[] = [];
 
 export const todoRoutes = Router();
 
 /** GET */
-todoRoutes.get('/todo', (_req, res, _next) => {
+todoRoutes.get(route, (_req, res, _next) => {
   res.status(200).json({ todos });
 });
 
 /** POST */ //  res: Response<Partial<Models.Todo>>
-todoRoutes.post('/todo', (req: Request<{}, {}, Models.Todo>, res, _next) => {
+todoRoutes.post(route, (req: Request<{}, {}, Models.Todo>, res, _next) => {
   const newTodo: Models.Todo = {
     id: new Date().toISOString(),
     text: req.body.text,
@@ -25,7 +27,7 @@ todoRoutes.post('/todo', (req: Request<{}, {}, Models.Todo>, res, _next) => {
 });
 
 /** PUT */
-todoRoutes.put('/todo/:todoId', (req, res, _next) => {
+todoRoutes.put(`${route}/:todoId`, (req, res, _next) => {
   const id = req.params.todoId;
 
   const todoIndex = todos.findIndex(t => t.id === id);
@@ -42,7 +44,7 @@ todoRoutes.put('/todo/:todoId', (req, res, _next) => {
 });
 
 /** DELETE */
-todoRoutes.delete('/todo/:todoId', (req, res, _next) => {
+todoRoutes.delete(`${route}/:todoId`, (req, res, _next) => {
   const id = req.params.todoId;
   const todoIndex = todos.findIndex(t => t.id === id);
   if (todoIndex >= 0 && todos[todoIndex]?.id) {
