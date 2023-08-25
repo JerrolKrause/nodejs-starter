@@ -56,3 +56,4 @@ yarn-error.log
 
 # angular
 /.angular
+src/env/
