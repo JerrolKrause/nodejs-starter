@@ -3,4 +3,5 @@ import { envDefaults } from './defaults.env';
 
 export const env: Models.Env = {
   ...envDefaults,
+  prod: true,
 };
