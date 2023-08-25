@@ -6,7 +6,7 @@ import 'tsconfig-paths/register';
 
 import { initializeFiles } from '$utils';
 import { environment } from './env/environment';
-import { restRoutes } from './routes/api/v1/api-endpoints';
+import { restRoutes } from './routes';
 
 // Check for the existence of startup files
 initializeFiles();

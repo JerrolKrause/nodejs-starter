@@ -1,5 +1,5 @@
+import { Todo } from '$models';
 import { generateRestEndpoint, generateRestOptions } from '$utils';
-import { Todo } from './todos/todos.model';
 
 /**
  * Model generate rest routes

@@ -1,1 +1,1 @@
-export * from './global.model';
+export * from './todos.model';
