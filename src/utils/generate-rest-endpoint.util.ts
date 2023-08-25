@@ -26,7 +26,7 @@ export interface GenerateRestApiModel<SchemaModel> {
    *
    * @example mongoose.model('Todo', new mongoose.Schema({ title: String }))
    */
-  schema: mongoose.Model<SchemaModel, {}, {}>;
+  model: mongoose.Model<SchemaModel, {}, {}>;
 }
 
 type RequestParams<PrimaryKey extends string> = {
@@ -68,10 +68,10 @@ export const generateRestOptions = <SchemaModel>(options: GenerateRestApiModel<S
 export const generateRestEndpoint = <SchemaModel extends object>(options: GenerateRestApiModel<SchemaModel>) => {
   const routes = Router();
   const pk = String(options.primaryKey);
-  console.log(options, pk);
+
   /** GET All */
   routes.get(options.path, (_req, res) => {
-    options.schema.find({}, (err, todos) => {
+    options.model.find({}, (err, todos) => {
       if (err) res.status(500).json({ message: 'An error occurred. ' + err });
       else res.json(todos);
     });
@@ -80,7 +80,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   // GET One
   routes.get(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
-    options.schema.findById(id, null, {}, (err, todo) => {
+    options.model.findById(id, null, {}, (err, todo) => {
       if (err) res.status(500).json({ message: 'An error occurred. ' + err });
       else if (!todo) res.status(404).json({ message: 'Todo not found' });
       else res.json(todo);
@@ -89,7 +89,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
 
   /** POST */
   routes.post(options.path, (req: Request<{}, {}, any>, res) => {
-    const newTodo = new options.schema(req.body);
+    const newTodo = new options.model(req.body);
     newTodo.save(err => {
       if (err) res.status(500).json({ message: 'An error occurred. ' + err });
       else res.status(201).json({ _id: newTodo._id });
@@ -99,7 +99,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** PUT */
   routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, any>, res) => {
     const id = req.params[pk];
-    options.schema.findByIdAndUpdate(id, req.body, { new: true }, (err, todo) => {
+    options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, todo) => {
       if (err) res.status(500).json({ message: 'An error occurred. ' + err });
       else if (!todo) res.status(404).json({ message: 'Todo not found' });
       else res.send();
@@ -109,7 +109,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** DELETE */
   routes.delete(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
-    options.schema.findByIdAndRemove(id, null, err => {
+    options.model.findByIdAndRemove(id, null, err => {
       if (err) res.status(500).json({ message: 'An error occurred. ' + err });
       else res.status(204).send();
     });

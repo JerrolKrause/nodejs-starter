@@ -38,6 +38,7 @@ app.use(bodyParser.json());
 // Routes
 const apiSlug = '/api/v1'; // Base API url slug
 app.use(apiSlug, todoRoutes);
+
 // restRoutes.forEach(r => app.use(apiSlug, r));
 
 mongoose
