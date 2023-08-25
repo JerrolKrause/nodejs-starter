@@ -1,10 +1,9 @@
-import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import 'tsconfig-paths/register';
 
-import { initializeFiles } from '$utils';
+import { globalErrorHandler, initializeFiles } from '$utils';
 import { environment } from './env/environment';
 import { restRoutes } from './routes';
 
@@ -34,16 +33,41 @@ if (env.env === 'dev') {
 const app = express();
 
 // Parse body responses as JSON
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Dynamically generated REST routes
 restRoutes.forEach(r => app.use('/api/v1', r));
 
 // Static routes
 
-mongoose
-  .connect(env.dbConnectionString ?? '', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => {
-    app.listen(3000);
-  })
-  .catch(err => console.log(err));
+// Use the global error handler as the last middleware
+app.use(globalErrorHandler);
+
+// Function to connect to the database
+const connectToDatabase = () => {
+  mongoose
+    .connect(env.dbConnectionString ?? '', {
+      useNewUrlParser: true,
+      // useUnifiedTopology: true,
+      autoReconnect: true, // Automatically try reconnecting if the connection is lost
+      reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
+      reconnectInterval: 500, // Reconnect every 500ms
+    })
+    // .then(() =>  console.log('Connected to MongoDB.'))
+    .catch(err => console.error('Failed to connect to MongoDB.', err));
+};
+
+// Function to handle when the connection is disconnected
+const handleDisconnection = (message: unknown) => {
+  console.error('MongoDB connection disconnected.', message);
+  // Attempt to reconnect after a delay
+  setTimeout(connectToDatabase, 3000);
+};
+
+// Handle events for the Mongoose connection
+mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
+mongoose.connection.on('error', err => console.error('MongoDB connection error:', err));
+mongoose.connection.on('disconnected', handleDisconnection);
+
+// Initial connection attempt
+connectToDatabase();

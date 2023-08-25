@@ -33,11 +33,11 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
-    "body-parser": "^1.18.3",
     "csurf": "^1.11.0",
     "dotenv": "^16.3.1",
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
+    "helmet": "^7.0.0",
     "mongodb": "^3.1.6",
     "mongoose": "^5.2.17"
   }
