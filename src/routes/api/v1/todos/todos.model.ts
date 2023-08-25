@@ -3,7 +3,8 @@ import mongoose, { Document, Schema } from 'mongoose';
 /**
  * @interface ITodo represents the structure of a todo item.
  */
-export interface Todo extends Document {
+export interface ITodo extends Document {
+  _id?: string;
   title: string;
   description?: string;
   completed?: boolean;
@@ -23,4 +24,4 @@ const todoSchema: Schema = new Schema({
 /**
  * @const Todo is the Mongoose model for a todo item.
  */
-export const Todo = mongoose.model<Todo>('Todo', todoSchema);
+export const Todo = mongoose.model<ITodo>('Todo', todoSchema);
