@@ -1,9 +1,11 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import helmet from 'helmet';
 import mongoose from 'mongoose';
 import 'tsconfig-paths/register';
 
 import { globalErrorHandler, initializeFiles } from '$utils';
+
 import { environment } from './env/environment';
 import { restRoutes } from './routes';
 
@@ -32,6 +34,9 @@ if (env.env === 'dev') {
 // Initialize express server
 const app = express();
 
+// Content Security Policy setup. Has to be before any routes!
+app.use(helmet());
+
 // Parse body responses as JSON
 app.use(express.json());
 
@@ -53,7 +58,7 @@ const connectToDatabase = () => {
       reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
       reconnectInterval: 500, // Reconnect every 500ms
     })
-    // .then(() =>  console.log('Connected to MongoDB.'))
+    .then(() => app.listen(3000))
     .catch(err => console.error('Failed to connect to MongoDB.', err));
 };
 
