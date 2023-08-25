@@ -4,7 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 import { environment } from './env/environment';
-import { todoRoutes } from './routes/api/v1/todos/todos.route';
+import { restRoutes } from './routes/api/v1/api-endpoints';
 import { initializeFiles } from './utils';
 
 // Check for the existence of startup files
@@ -37,7 +37,8 @@ app.use(bodyParser.json());
 
 // Routes
 const apiSlug = '/api/v1'; // Base API url slug
-app.use(apiSlug, todoRoutes);
+// app.use(apiSlug, todoRoutes);
+restRoutes.forEach(r => app.use(apiSlug, r));
 
 mongoose
   .connect(env.dbConnectionString ?? '', { useNewUrlParser: true, useUnifiedTopology: true })
