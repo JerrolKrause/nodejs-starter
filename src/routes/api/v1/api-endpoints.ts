@@ -1,14 +1,18 @@
 import { generateRestEndpoint, generateRestOptions } from '../../../utils/generate-rest-endpoint.util';
 import { Todo } from './todos/todos.model';
 
+/**
+ * Model generate rest routes
+ */
 const restEndpointModels = [
   generateRestOptions({
-    path: '/todos',
+    path: '/todo',
     primaryKey: '_id',
-    schema: Todo,
+    model: Todo,
   }),
 ];
 
+/**
+ * All model generated rest routes
+ */
 export const restRoutes = restEndpointModels.map(m => generateRestEndpoint(m));
-// console.log('restEndpointModels', restEndpointModels);
-// console.log('restRoutes', restRoutes[0]);

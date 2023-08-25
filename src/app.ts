@@ -4,7 +4,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 
 import { environment } from './env/environment';
-import { todoRoutes } from './routes/api/v1/todos/todos.route';
+import { restRoutes } from './routes/api/v1/api-endpoints';
 import { initializeFiles } from './utils';
 
 // Check for the existence of startup files
@@ -35,13 +35,14 @@ const app = express();
 // Parse body responses as JSON
 app.use(bodyParser.json());
 
-// Routes
-const apiSlug = '/api/v1'; // Base API url slug
-app.use(apiSlug, todoRoutes);
+// Dynamically generated REST routes
+restRoutes.forEach(r => app.use('/api/v1', r));
 
-// restRoutes.forEach(r => app.use(apiSlug, r));
+// Static routes
 
 mongoose
   .connect(env.dbConnectionString ?? '', { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => app.listen(3000))
+  .then(() => {
+    app.listen(3000);
+  })
   .catch(err => console.log(err));
