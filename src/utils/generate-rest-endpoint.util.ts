@@ -68,7 +68,7 @@ export const generateRestOptions = <SchemaModel>(options: GenerateRestApiModel<S
 export const generateRestEndpoint = <SchemaModel extends object>(options: GenerateRestApiModel<SchemaModel>) => {
   const routes = Router();
   const pk = String(options.primaryKey);
-  console.log(options);
+  console.log(options, pk);
   /** GET All */
   routes.get(options.path, (_req, res) => {
     options.schema.find({}, (err, todos) => {

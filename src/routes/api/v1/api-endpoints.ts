@@ -10,3 +10,5 @@ const restEndpointModels = [
 ];
 
 export const restRoutes = restEndpointModels.map(m => generateRestEndpoint(m));
+// console.log('restEndpointModels', restEndpointModels);
+// console.log('restRoutes', restRoutes[0]);
