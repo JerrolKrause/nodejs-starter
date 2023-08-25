@@ -2,10 +2,11 @@ import bodyParser from 'body-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
+import 'tsconfig-paths/register';
 
+import { initializeFiles } from '$utils';
 import { environment } from './env/environment';
 import { restRoutes } from './routes/api/v1/api-endpoints';
-import { initializeFiles } from './utils';
 
 // Check for the existence of startup files
 initializeFiles();

@@ -1,5 +1,6 @@
 import { Request, Router } from 'express';
 import mongoose from 'mongoose';
+import { handleError } from './handle-errors.util';
 
 /**
  * Interface representing the configuration options needed to generate RESTful API endpoints for a specific Mongoose schema model.
@@ -22,7 +23,7 @@ export interface GenerateRestApiModel<SchemaModel> {
   primaryKey: keyof SchemaModel;
 
   /**
-   * The Mongoose model that defines the schema and provides methods for querying and manipulating the collection.
+   * The Mongoose model that defines the model and provides methods for querying and manipulating the collection.
    *
    * @example mongoose.model('Todo', new mongoose.Schema({ title: String }))
    */
@@ -40,12 +41,12 @@ type RequestParams<PrimaryKey extends string> = {
  * @param {GenerateRestApiModel<SchemaModel>} options An object containing the necessary options to generate the REST API.
  * @param {string} options.path The base path for the REST endpoints.
  * @param {keyof SchemaModel} options.primaryKey The key to use as the primary key for the model. This key should be a unique identifier for documents within the collection.
- * @param {mongoose.Model<SchemaModel, {}, {}>} options.schema The Mongoose model that defines the schema and provides methods for querying and manipulating the collection.
+ * @param {mongoose.Model<SchemaModel, {}, {}>} options.model The Mongoose model that defines the model and provides methods for querying and manipulating the collection.
  * @returns {GenerateRestApiModel<SchemaModel>} The original options object, unchanged. This return is useful for chaining or other further configuration.
  * @example
  * const todoSchema = new mongoose.Schema({ title: String });
  * const todoModel = mongoose.model('Todo', todoSchema);
- * const options = generateRestOptions({ path: '/todos', primaryKey: 'id', schema: todoModel });
+ * const options = generateRestOptions({ path: '/todos', primaryKey: 'id', model: todoModel });
  */
 export const generateRestOptions = <SchemaModel>(options: GenerateRestApiModel<SchemaModel>) => options;
 
@@ -56,13 +57,13 @@ export const generateRestOptions = <SchemaModel>(options: GenerateRestApiModel<S
  * @param {GenerateRestApiModel<SchemaModel>} options An object containing the necessary options to generate the REST API.
  * @param {string} options.path The base path for the REST endpoints.
  * @param {keyof SchemaModel} options.primaryKey The key to use as the primary key for the model. This key should be a unique identifier for documents within the collection.
- * @param {mongoose.Model<SchemaModel, {}, {}>} options.schema The Mongoose model that defines the schema and provides methods for querying and manipulating the collection.
+ * @param {mongoose.Model<SchemaModel, {}, {}>} options.model The Mongoose model that defines the model and provides methods for querying and manipulating the collection.
  * @returns {Router} A Router object containing the generated endpoints. This can be used with an Express application to handle requests for the specified paths.
  *
  * @example
  * const todoSchema = new mongoose.Schema({ title: String });
  * const todoModel = mongoose.model('Todo', todoSchema);
- * const todoRoutes = generateRestEndpoint({ path: '/todos', primaryKey: 'id', schema: todoModel });
+ * const todoRoutes = generateRestEndpoint({ path: '/todos', primaryKey: 'id', model: todoModel });
  * app.use(todoRoutes);
  */
 export const generateRestEndpoint = <SchemaModel extends object>(options: GenerateRestApiModel<SchemaModel>) => {
@@ -71,37 +72,37 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
 
   /** GET All */
   routes.get(options.path, (_req, res) => {
-    options.model.find({}, (err, todos) => {
-      if (err) res.status(500).json({ message: 'An error occurred. ' + err });
-      else res.json(todos);
+    options.model.find({}, (err, model) => {
+      if (err) return handleError(err, res);
+      else res.json(model);
     });
   });
 
   // GET One
   routes.get(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
-    options.model.findById(id, null, {}, (err, todo) => {
-      if (err) res.status(500).json({ message: 'An error occurred. ' + err });
-      else if (!todo) res.status(404).json({ message: 'Todo not found' });
-      else res.json(todo);
+    options.model.findById(id, null, {}, (err, model) => {
+      if (err) return handleError(err, res);
+      else if (!model) res.status(404).json({ message: 'Entity not found' });
+      else res.json(model);
     });
   });
 
   /** POST */
-  routes.post(options.path, (req: Request<{}, {}, any>, res) => {
+  routes.post(options.path, (req: Request<{}, {}, {}>, res) => {
     const newTodo = new options.model(req.body);
     newTodo.save(err => {
-      if (err) res.status(500).json({ message: 'An error occurred. ' + err });
+      if (err) return handleError(err, res);
       else res.status(201).json({ _id: newTodo._id });
     });
   });
 
   /** PUT */
-  routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, any>, res) => {
+  routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res) => {
     const id = req.params[pk];
-    options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, todo) => {
-      if (err) res.status(500).json({ message: 'An error occurred. ' + err });
-      else if (!todo) res.status(404).json({ message: 'Todo not found' });
+    options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, model) => {
+      if (err) return handleError(err, res);
+      else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.send();
     });
   });
@@ -110,7 +111,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   routes.delete(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
     options.model.findByIdAndRemove(id, null, err => {
-      if (err) res.status(500).json({ message: 'An error occurred. ' + err });
+      if (err) return handleError(err, res);
       else res.status(204).send();
     });
   });

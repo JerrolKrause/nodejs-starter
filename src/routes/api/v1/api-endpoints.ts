@@ -1,4 +1,4 @@
-import { generateRestEndpoint, generateRestOptions } from '../../../utils/generate-rest-endpoint.util';
+import { generateRestEndpoint, generateRestOptions } from '$utils';
 import { Todo } from './todos/todos.model';
 
 /**
