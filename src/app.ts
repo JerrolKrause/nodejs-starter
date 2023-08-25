@@ -3,7 +3,10 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import { todoRoutes } from './routes/api/v1/todos/todos.route';
-import { addEnvFile } from './utils';
+import { initializeFiles } from './utils';
+
+// Check for the existence of startup files
+initializeFiles();
 
 // Load the .env file specified by the ENV_PATH environment variable
 const envPath = process.env['ENV_PATH'] || 'src/env/.env.development'; // Fallback to default .env
@@ -25,9 +28,6 @@ if (!isProduction) {
 
 // Initialize express server
 const app = express();
-
-// Check for the existence of a secure env file, create one if not
-addEnvFile();
 
 // Parse body responses as JSON
 app.use(bodyParser.json());

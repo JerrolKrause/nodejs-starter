@@ -3,27 +3,27 @@ import fs from 'fs';
 /**
  * Check for the existence of a env file that will not be committed, create one if not
  */
-export const addEnvFile = () => {
+export const initializeFiles = () => {
   const files = [
     {
       path: 'src/env/.env.development',
       content: `# Environment (production or development)
-    NODE_ENV=dev
+NODE_ENV=dev
 
-    # Connection Strings
-    DB_CONNECTION_STRING=your-connection-string
+# Connection Strings
+DB_CONNECTION_STRING=your-connection-string
 
-    # API Keys`,
+# API Keys`,
     },
     {
       path: 'src/env/.env.production',
       content: `# Environment (production or development)
-    NODE_ENV=prod
+NODE_ENV=prod
 
-    # Connection Strings
-    DB_CONNECTION_STRING=your-connection-string
+# Connection Strings
+DB_CONNECTION_STRING=your-connection-string
 
-    # API Keys`,
+# API Keys`,
     },
   ];
 
