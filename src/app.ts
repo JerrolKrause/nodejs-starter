@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 
+import { environment } from './env/environment';
 import { todoRoutes } from './routes/api/v1/todos/todos.route';
 import { initializeFiles } from './utils';
 
@@ -14,15 +15,16 @@ const envPath = process.env['ENV_PATH'] || 'src/env/.env.development'; // Fallba
 // Load ENV variables into node ENV
 dotenv.config({ path: envPath });
 
-const isProduction = process.env['NODE_ENV'] === 'prod';
-const dbConnectionString = process.env['DB_CONNECTION_STRING'] ?? '';
-if (!dbConnectionString) {
+// Extract typesafe environment variables from node process
+const env = environment(process.env);
+
+if (!env.dbConnectionString) {
   console.error('DB connection string not found');
 }
 
 // If not on prod...
 // Add source map support
-if (!isProduction) {
+if (env.env === 'dev') {
   require('source-map-support').install();
   process.on('unhandledRejection', console.log);
 }
@@ -38,6 +40,6 @@ const apiSlug = '/api/v1'; // Base API url slug
 app.use(apiSlug, todoRoutes);
 
 mongoose
-  .connect(dbConnectionString, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(env.dbConnectionString ?? '', { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => app.listen(3000))
   .catch(err => console.log(err));
