@@ -3,6 +3,8 @@ import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
+import swaggerJsdoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 import 'tsconfig-paths/register';
 
 import { globalErrorHandler, initializeFiles } from '$utils';
@@ -10,7 +12,7 @@ import { globalErrorHandler, initializeFiles } from '$utils';
 import { environment } from './env/environment';
 import { restRoutes } from './routes';
 
-// Check for the existence of startup files
+// Check for the existence of startup files, create if not found
 initializeFiles();
 
 // Load the .env file specified by the ENV_PATH environment variable
@@ -59,6 +61,23 @@ app.use(express.json());
 restRoutes.forEach(r => app.use('/api/v1', r));
 
 // Static routes
+
+// Dev only routes
+if (env.env === 'dev') {
+  // Initialize swagger-jsdoc -> returns validated swagger spec in json format
+  const swaggerSpec = swaggerJsdoc({
+    definition: {
+      openapi: '3.0.0',
+      info: {
+        title: 'NodeJS Starter Application',
+        version: '0.0.1',
+      },
+    },
+    apis: ['./src/routes*.ts'], // files containing annotations as above
+  });
+  // Swagger for API documentation
+  app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+}
 
 // 404 handler for non matched routes, must be after all other middlewhere but before error
 app.use((_req, res) => res.status(404).json({ message: 'Resource not found' }));
