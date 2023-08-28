@@ -4,7 +4,7 @@
   "description": "NodeJS starter template equipped with MongoDB and Mongoose for streamlined REST API development.",
   "main": "app.js",
   "scripts": {
-    "start": "cross-env ENV_PATH=src/env/.env.development nodemon --enable-source-maps ",
+    "start": "cross-env ENV_PATH=src/env/.env.development nodemon",
     "prod": "cross-env ENV_PATH=src/env/.env.production ts-node -r tsconfig-paths/register src/app.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
