@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import express from 'express';
+import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import mongoose from 'mongoose';
 import 'tsconfig-paths/register';
@@ -34,8 +35,22 @@ if (env.env === 'dev') {
 // Initialize express server
 const app = express();
 
+// Apply rate limiter to all requests
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many requests, please try again later.',
+  }),
+);
+
 // Content Security Policy setup. Has to be before any routes!
 app.use(helmet());
+
+// Handle static request for files
+app.use(express.static('public'));
 
 // Parse body responses as JSON
 app.use(express.json());
@@ -46,11 +61,10 @@ restRoutes.forEach(r => app.use('/api/v1', r));
 // Static routes
 
 // 404 handler for non matched routes, must be after all other middlewhere but before error
-app.use((_req, res) => {
-  res.status(404).json({ message: 'Resource not found' });
-});
+app.use((_req, res) => res.status(404).json({ message: 'Resource not found' }));
 
-// Use the global error handler as the last middleware
+// Use the global error handler
+// Must be last
 app.use(globalErrorHandler);
 
 // Function to connect to the database
