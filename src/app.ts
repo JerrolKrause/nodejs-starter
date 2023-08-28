@@ -64,17 +64,10 @@ const connectToDatabase = () => {
     .catch(err => console.error('Failed to connect to MongoDB.', err));
 };
 
-// Function to handle when the connection is disconnected
-const handleDisconnection = (message: unknown) => {
-  console.error('MongoDB connection disconnected.', message);
-  // Attempt to reconnect after a delay
-  setTimeout(connectToDatabase, 3000);
-};
-
 // Handle events for the Mongoose connection
 mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
 mongoose.connection.on('error', err => console.error('MongoDB connection error:', err));
-mongoose.connection.on('disconnected', handleDisconnection);
+mongoose.connection.on('disconnected', err => console.error('MongoDB disconnected:', err));
 
 // Initial connection attempt
 connectToDatabase();
