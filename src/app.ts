@@ -45,6 +45,11 @@ restRoutes.forEach(r => app.use('/api/v1', r));
 
 // Static routes
 
+// 404 handler for non matched routes, must be after all other middlewhere but before error
+app.use((_req, res) => {
+  res.status(404).json({ message: 'Resource not found' });
+});
+
 // Use the global error handler as the last middleware
 app.use(globalErrorHandler);
 
