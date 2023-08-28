@@ -10,7 +10,7 @@ import 'tsconfig-paths/register';
 import { globalErrorHandler, initializeFiles } from '$utils';
 
 import { environment } from './env/environment';
-import { restRoutes } from './routes';
+import { restRoutes, sessionRoute } from './routes';
 
 // Check for the existence of startup files, create if not found
 initializeFiles();
@@ -61,6 +61,7 @@ app.use(express.json());
 restRoutes.forEach(r => app.use('/api/v1', r));
 
 // Static routes
+app.use('/api/v1', sessionRoute); // Session
 
 // Dev only routes
 if (env.env === 'dev') {
@@ -82,8 +83,7 @@ if (env.env === 'dev') {
 // 404 handler for non matched routes, must be after all other middlewhere but before error
 app.use((_req, res) => res.status(404).json({ message: 'Resource not found' }));
 
-// Use the global error handler
-// Must be last
+// Use the global error handler. Must be last
 app.use(globalErrorHandler);
 
 // Function to connect to the database

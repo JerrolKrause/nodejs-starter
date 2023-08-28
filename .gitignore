@@ -53,6 +53,7 @@ obj/
 angular-starter.csproj
 App.config
 yarn-error.log
+logs
 
 # angular
 /.angular
