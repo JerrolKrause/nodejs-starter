@@ -58,10 +58,7 @@ const connectToDatabase = () => {
   mongoose
     .connect(env.dbConnectionString ?? '', {
       useNewUrlParser: true,
-      // useUnifiedTopology: true,
-      autoReconnect: true, // Automatically try reconnecting if the connection is lost
-      reconnectTries: Number.MAX_VALUE, // Never stop trying to reconnect
-      reconnectInterval: 500, // Reconnect every 500ms
+      useUnifiedTopology: true, // Automaically trys to reconnect
     })
     .then(() => app.listen(3000))
     .catch(err => console.error('Failed to connect to MongoDB.', err));
