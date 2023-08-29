@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { Error } from 'mongoose';
+import { writeErrorToLog } from './write-error-to-file.util';
 
 /**
  * Handle REST api errors
@@ -7,6 +8,8 @@ import { Error } from 'mongoose';
  * @param res
  */
 export const handleError = (err: Error, res: Response) => {
-  console.error('API Error', err); // Log the detailed error for debugging
+  console.error('Database Error:', JSON.stringify(err)); // Log the detailed error for debugging
+  // Write the error details to a log file
+  writeErrorToLog(err);
   res.status(400).json({ message: err.message });
 };

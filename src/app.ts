@@ -7,7 +7,7 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import 'tsconfig-paths/register';
 
-import { globalErrorHandler, initializeFiles } from '$utils';
+import { globalErrorHandler, initializeFiles, writeErrorToLog } from '$utils';
 
 import { environment } from './env/environment';
 import { restRoutes, sessionRoute } from './routes';
@@ -94,12 +94,18 @@ const connectToDatabase = () => {
       useUnifiedTopology: true, // Automaically trys to reconnect
     })
     .then(() => app.listen(3000))
-    .catch(err => console.error('Failed to connect to MongoDB.', err));
+    .catch(err => {
+      console.error('Failed to connect to MongoDB.', err);
+      writeErrorToLog(err);
+    });
 };
 
 // Handle events for the Mongoose connection
 mongoose.connection.on('connected', () => console.log('MongoDB connected'));
-mongoose.connection.on('error', err => console.error('MongoDB connection error:', err));
+mongoose.connection.on('error', err => {
+  console.error('MongoDB connection error:', err);
+  writeErrorToLog(err);
+});
 mongoose.connection.on('disconnected', () => console.error('MongoDB disconnected'));
 
 // Initial connection attempt
