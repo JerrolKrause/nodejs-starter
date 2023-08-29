@@ -7,6 +7,6 @@ import { Error } from 'mongoose';
  * @param res
  */
 export const handleError = (err: Error, res: Response) => {
-  console.error(err); // Log the detailed error for debugging
-  res.status(500).json({ message: `An error occurred: ${err.message}` });
+  console.error('API Error', err); // Log the detailed error for debugging
+  res.status(400).json({ message: err.message });
 };

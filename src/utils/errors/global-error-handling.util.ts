@@ -53,5 +53,7 @@ export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) =
   writeErrorToFile(err);
 
   // Respond with a generic error message
-  res.status(500).json({ message: 'An unexpected error occurred. Please try again later.' });
+  res.status(500).json({
+    message: err.toString(),
+  });
 };

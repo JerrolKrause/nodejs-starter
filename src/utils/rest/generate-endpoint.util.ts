@@ -100,7 +100,9 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** PUT */
   routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res) => {
     const id = req.params[pk];
+    console.log(0);
     options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, model) => {
+      console.log(1, err);
       if (err) return handleError(err, res);
       else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.send();
