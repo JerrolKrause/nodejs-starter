@@ -98,9 +98,9 @@ const connectToDatabase = () => {
 };
 
 // Handle events for the Mongoose connection
-mongoose.connection.on('connected', () => console.log('MongoDB connected.'));
+mongoose.connection.on('connected', () => console.log('MongoDB connected'));
 mongoose.connection.on('error', err => console.error('MongoDB connection error:', err));
-mongoose.connection.on('disconnected', err => console.error('MongoDB disconnected:', err));
+mongoose.connection.on('disconnected', () => console.error('MongoDB disconnected'));
 
 // Initial connection attempt
 connectToDatabase();
