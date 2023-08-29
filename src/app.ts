@@ -22,6 +22,7 @@ dotenv.config({ path: envPath });
 
 // Extract typesafe environment variables from node process
 const env = environment(process.env);
+const isProd = env.env === 'production';
 
 if (!env.dbConnectionString) {
   console.error('DB connection string not found');
@@ -29,7 +30,7 @@ if (!env.dbConnectionString) {
 
 // If not on prod...
 // Add source map support
-if (env.env === 'dev') {
+if (!isProd) {
   require('source-map-support').install();
   process.on('unhandledRejection', console.log);
 }
@@ -48,7 +49,15 @@ app.use(
   }),
 );
 
-// Content Security Policy setup. Has to be before any routes!
+// CORS Handling. Allow requests from other domains
+app.use((_req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*'); // Allow access from this domain. Change wildcard to improve security
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE'); // Allow these methods
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow these additional headers
+  next();
+});
+
+// Content Security Policy setup. Has to be before any routes
 app.use(helmet());
 
 // Handle static request for files
@@ -64,7 +73,7 @@ restRoutes.forEach(r => app.use('/api/v1', r));
 app.use('/api/v1', sessionRoute); // Session
 
 // Dev only routes
-if (env.env === 'dev') {
+if (!isProd) {
   // Initialize swagger-jsdoc -> returns validated swagger spec in json format
   const swaggerSpec = swaggerJsdoc({
     definition: {
