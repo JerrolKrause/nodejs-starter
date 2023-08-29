@@ -1,5 +1,5 @@
 import { Todo } from '$models';
-import { generateRestOptions } from './generate-endpoint.util';
+import { generateRestOptions } from '../utils/rest/generate-endpoint.util';
 
 /**
  * @swagger

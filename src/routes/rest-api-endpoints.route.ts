@@ -1,12 +1,12 @@
 import { generateRestEndpoint } from '$utils';
-import { todoRoutes } from '../utils/rest/todo.route';
+import { todoRoutes } from './todo.route';
 
 /**
- * Model generate rest routes
+ * Options for model generating rest routes
  */
 const restEndpointModels = [todoRoutes];
 
 /**
- * All model generated rest routes
+ * REST routes dynamically generated
  */
 export const restRoutes = restEndpointModels.map(m => generateRestEndpoint(m));
