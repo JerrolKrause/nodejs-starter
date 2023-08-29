@@ -90,7 +90,6 @@ import { generateRestOptions } from '../utils/rest/generate-endpoint.util';
  *         '204':
  *           description: Todo deleted successfully
  */
-
 export const todoRoutes = generateRestOptions({
   path: '/todo',
   primaryKey: '_id',

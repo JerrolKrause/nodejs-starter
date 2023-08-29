@@ -16,6 +16,16 @@ DB_CONNECTION_STRING=your-connection-string
 # API Keys`,
     },
     {
+      path: 'src/env/.env.qa',
+      content: `# Environment (production or development)
+NODE_ENV=dev
+
+# Connection Strings
+DB_CONNECTION_STRING=your-connection-string
+
+# API Keys`,
+    },
+    {
       path: 'src/env/.env.production',
       content: `# Environment (production or development)
 NODE_ENV=prod

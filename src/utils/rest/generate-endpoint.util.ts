@@ -1,6 +1,6 @@
 import { Request, Router } from 'express';
 import mongoose from 'mongoose';
-import { handleError } from '../errors/database-error-handling.util';
+import { handleDBError } from '../errors/database-error-handling.util';
 
 /**
  * Interface representing the configuration options needed to generate RESTful API endpoints for a specific Mongoose schema model.
@@ -73,7 +73,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** GET All */
   routes.get(options.path, (_req, res) => {
     options.model.find({}, (err, model) => {
-      if (err) return handleError(err, res);
+      if (err) return handleDBError(err, res);
       else res.json(model);
     });
   });
@@ -82,7 +82,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   routes.get(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
     options.model.findById(id, null, {}, (err, model) => {
-      if (err) return handleError(err, res);
+      if (err) return handleDBError(err, res);
       else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.json(model);
     });
@@ -92,7 +92,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   routes.post(options.path, (req: Request<{}, {}, {}>, res) => {
     const newTodo = new options.model(req.body);
     newTodo.save(err => {
-      if (err) return handleError(err, res);
+      if (err) return handleDBError(err, res);
       else res.status(201).json({ _id: newTodo._id });
     });
   });
@@ -101,7 +101,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res) => {
     const id = req.params[pk];
     options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, model) => {
-      if (err) return handleError(err, res);
+      if (err) return handleDBError(err, res);
       else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.send();
     });
@@ -111,7 +111,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   routes.delete(`${options.path}/:${pk}`, (req, res) => {
     const id = req.params[pk];
     options.model.findByIdAndRemove(id, null, err => {
-      if (err) return handleError(err, res);
+      if (err) return handleDBError(err, res);
       else res.status(204).send();
     });
   });

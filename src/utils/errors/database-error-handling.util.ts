@@ -7,7 +7,7 @@ import { writeErrorToLog } from './write-error-to-file.util';
  * @param err
  * @param res
  */
-export const handleError = (err: Error, res: Response) => {
+export const handleDBError = (err: Error, res: Response) => {
   console.error('Database Error:', JSON.stringify(err)); // Log the detailed error for debugging
   // Write the error details to a log file
   writeErrorToLog(err);
