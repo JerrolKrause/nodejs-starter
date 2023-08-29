@@ -1,16 +1,10 @@
-import { Todo } from '$models';
-import { generateRestEndpoint, generateRestOptions } from '$utils';
+import { generateRestEndpoint } from '$utils';
+import { todoRoutes } from '../utils/rest/todo.route';
 
 /**
  * Model generate rest routes
  */
-const restEndpointModels = [
-  generateRestOptions({
-    path: '/todo',
-    primaryKey: '_id',
-    model: Todo,
-  }),
-];
+const restEndpointModels = [todoRoutes];
 
 /**
  * All model generated rest routes

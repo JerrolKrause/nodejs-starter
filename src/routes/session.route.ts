@@ -1,9 +1,19 @@
 import { Router } from 'express';
 
 const routes = Router();
-/** GET All */
+/**
+ * @swagger
+ * /session:
+ *  get:
+ *    description: Returns an array with the message 'Hello World'
+ *    responses:
+ *      200:
+ *        description: Success
+ *        content:
+ *          application/json:
+ *            example: ["Hello World"]
+ */
 routes.get('/session', (_req, res) => {
-  throw new Error('This is an error');
   return res.json(['Hello World']);
 });
 

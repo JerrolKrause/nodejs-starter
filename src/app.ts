@@ -74,7 +74,7 @@ if (env.env === 'dev') {
         version: '0.0.1',
       },
     },
-    apis: ['./src/routes*.ts'], // files containing annotations as above
+    apis: ['./**/*.ts'], // files containing annotations as above
   });
   // Swagger for API documentation
   app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
