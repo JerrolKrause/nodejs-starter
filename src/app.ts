@@ -15,13 +15,14 @@ import { restRoutes, sessionRoute } from './routes';
 // Check for the existence of startup files, create if not found
 initializeFiles();
 
-// Load the .env file specified by the ENV_PATH environment variable
+// Load the .env file specified by the ENV_PATH environment variable. ENV_PATH is set via the npm run command
 const envPath = process.env['ENV_PATH'] || 'src/env/.env.development'; // Fallback to default .env
 // Load ENV variables into node ENV
 dotenv.config({ path: envPath });
 
 // Extract typesafe environment variables from node process
 const env = environment(process.env);
+// Is on prod env
 const isProd = env.env === 'production';
 
 if (!env.dbConnectionString) {
@@ -41,7 +42,7 @@ const app = express();
 // Apply rate limiter to all requests
 app.use(
   rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
+    windowMs: 5 * 60 * 1000, // 5 minutes
     max: 100, // Limit each IP to 100 requests per windowMs
     standardHeaders: true,
     legacyHeaders: false,
@@ -52,7 +53,7 @@ app.use(
 // CORS Handling. Allow requests from other domains
 app.use((_req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow access from this domain. Change wildcard to improve security
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE'); // Allow these methods
+  res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE'); // Allow these methods
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow these additional headers
   next();
 });
@@ -60,7 +61,7 @@ app.use((_req, res, next) => {
 // Content Security Policy setup. Has to be before any routes
 app.use(helmet());
 
-// Handle static request for files
+// Handle requests  for static files
 app.use(express.static('public'));
 
 // Parse body responses as JSON
@@ -80,7 +81,7 @@ if (!isProd) {
       openapi: '3.0.0',
       info: {
         title: 'NodeJS Starter Application',
-        version: '0.0.1',
+        version: '1.0.0',
       },
     },
     apis: ['./**/*.ts'], // files containing annotations as above
@@ -95,20 +96,6 @@ app.use((_req, res) => res.status(404).json({ message: 'Resource not found' }));
 // Use the global error handler. Must be last
 app.use(globalErrorHandler);
 
-// Function to connect to the database
-const connectToDatabase = () => {
-  mongoose
-    .connect(env.dbConnectionString ?? '', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true, // Automaically trys to reconnect
-    })
-    .then(() => app.listen(3000))
-    .catch(err => {
-      console.error('Failed to connect to MongoDB.', err);
-      writeErrorToLog(err);
-    });
-};
-
 // Handle events for the Mongoose connection
 mongoose.connection.on('connected', () => console.log('MongoDB connected'));
 mongoose.connection.on('error', err => {
@@ -117,5 +104,14 @@ mongoose.connection.on('error', err => {
 });
 mongoose.connection.on('disconnected', () => console.error('MongoDB disconnected'));
 
-// Initial connection attempt
-connectToDatabase();
+// Connect to DB and start server
+mongoose
+  .connect(env.dbConnectionString ?? '', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true, // Automaically trys to reconnect
+  })
+  .then(() => app.listen(3000))
+  .catch(err => {
+    console.error('Failed to connect to MongoDB.', err);
+    writeErrorToLog(err);
+  });
