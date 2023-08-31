@@ -62,6 +62,7 @@ app.use((_req, res, next) => {
 app.use(helmet());
 
 // Handle requests  for static files
+// Public will be static file root so a file at public\json\test.json will serve from http://localhost:3000/json/test.json
 app.use(express.static('public'));
 
 // Parse body responses as JSON
