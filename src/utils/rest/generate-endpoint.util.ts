@@ -70,21 +70,28 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   const pk = String(options.primaryKey);
 
   /** GET All */
-  routes.get(options.path, (_req, res, next) => {
-    options.model.find({}, (err, model) => {
-      if (err) return next(err);
-      else res.json(model);
-    });
+  routes.get(options.path, async (_req, res, next) => {
+    try {
+      const model = await options.model.find({});
+      res.json(model);
+    } catch (err) {
+      next(err);
+    }
   });
 
   // GET One
-  routes.get(`${options.path}/:${pk}`, (req, res, next) => {
+  routes.get(`${options.path}/:${pk}`, async (req, res, next) => {
     const id = req.params[pk];
-    options.model.findById(id, null, {}, (err, model) => {
-      if (err) return next(err);
-      else if (!model) res.status(404).json({ message: 'Entity not found' });
-      else res.json(model);
-    });
+    try {
+      const model = await options.model.findById(id);
+      if (!model) {
+        res.status(404).json({ message: 'Entity not found' });
+      } else {
+        res.json(model);
+      }
+    } catch (err) {
+      next(err);
+    }
   });
 
   /** POST */
