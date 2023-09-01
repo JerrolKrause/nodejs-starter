@@ -28,7 +28,11 @@ routes.post('/session', body('username').trim().escape().isLength({ min: 5 }), b
 
   // Has errors
   if (!errors.isEmpty()) {
-    return res.status(422).json({ message: 'Validation failed', errors });
+    // const error = new Error('That username and password combination is incorrect');
+    // error.stack = errors.toString();
+    // error.statusCode = 422;
+    // throw error;
+    return res.status(422).json({ message: 'Unable to log in with that username and password combination', ...errors });
   }
 
   return res.json(['Hello World']);

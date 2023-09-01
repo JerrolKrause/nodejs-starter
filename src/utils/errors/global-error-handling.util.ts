@@ -11,7 +11,7 @@ import { writeErrorToLog } from './write-error-to-file.util';
  */
 export const globalErrorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   // Log the error to the console
-  // console.error('Global error:', JSON.stringify(err));
+  console.error('Global error:', err.name, JSON.stringify(err));
 
   // Write the error details to a log file
   writeErrorToLog(err);
