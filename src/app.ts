@@ -10,7 +10,7 @@ import 'tsconfig-paths/register';
 import { globalErrorHandler, initializeFiles, writeErrorToLog } from '$utils';
 
 import { environment } from './env/environment';
-import { restRoutes, sessionRoute } from './routes';
+import { restRoutes, sessionRoute, uploadRoute } from './routes';
 
 // Check for the existence of startup files, create if not found
 initializeFiles();
@@ -73,6 +73,7 @@ restRoutes.forEach(r => app.use('/api/v1', r));
 
 // Static routes
 app.use('/api/v1', sessionRoute); // Session
+app.use('/api/v1', uploadRoute); // File Uploads
 
 // Dev only routes
 if (!isProd) {

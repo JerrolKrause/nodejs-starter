@@ -1,6 +1,5 @@
 import { Request, Router } from 'express';
 import mongoose from 'mongoose';
-import { handleDBError } from '../errors/database-error-handling.util';
 
 /**
  * Interface representing the configuration options needed to generate RESTful API endpoints for a specific Mongoose schema model.
@@ -71,47 +70,47 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   const pk = String(options.primaryKey);
 
   /** GET All */
-  routes.get(options.path, (_req, res) => {
+  routes.get(options.path, (_req, res, next) => {
     options.model.find({}, (err, model) => {
-      if (err) return handleDBError(err, res);
+      if (err) return next(err);
       else res.json(model);
     });
   });
 
   // GET One
-  routes.get(`${options.path}/:${pk}`, (req, res) => {
+  routes.get(`${options.path}/:${pk}`, (req, res, next) => {
     const id = req.params[pk];
     options.model.findById(id, null, {}, (err, model) => {
-      if (err) return handleDBError(err, res);
+      if (err) return next(err);
       else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.json(model);
     });
   });
 
   /** POST */
-  routes.post(options.path, (req: Request<{}, {}, {}>, res) => {
+  routes.post(options.path, (req: Request<{}, {}, {}>, res, next) => {
     const newTodo = new options.model(req.body);
     newTodo.save(err => {
-      if (err) return handleDBError(err, res);
+      if (err) return next(err);
       else res.status(201).json({ _id: newTodo._id });
     });
   });
 
   /** PUT */
-  routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res) => {
+  routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res, next) => {
     const id = req.params[pk];
     options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, model) => {
-      if (err) return handleDBError(err, res);
+      if (err) return next(err);
       else if (!model) res.status(404).json({ message: 'Entity not found' });
       else res.send();
     });
   });
 
   /** DELETE */
-  routes.delete(`${options.path}/:${pk}`, (req, res) => {
+  routes.delete(`${options.path}/:${pk}`, (req, res, next) => {
     const id = req.params[pk];
     options.model.findByIdAndRemove(id, null, err => {
-      if (err) return handleDBError(err, res);
+      if (err) return next(err);
       else res.status(204).send();
     });
   });
