@@ -26,9 +26,7 @@ import mongoose, { Document, Schema } from 'mongoose';
  *           format: date-time
  *           description: The due date of the todo
  */
-/**
- * @interface ITodo represents the structure of a todo item.
- */
+
 /**
  * @interface ITodo represents the structure of a todo item.
  */

@@ -1,5 +1,8 @@
+import { IUser, User } from '$models';
+import { compare, hash } from 'bcryptjs';
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
+import { sign } from 'jsonwebtoken';
 
 export interface Session {
   username: string;
@@ -7,35 +10,72 @@ export interface Session {
 }
 
 const routes = Router();
-/**
- * @swagger
- * /session:
- *  get:
- *    description: Returns an array with the message 'Hello World'
- *    responses:
- *      200:
- *        description: Success
- *        content:
- *          application/json:
- *            example: ["Hello World"]
- */
-routes.get('/session', (_req, res) => {
-  return res.json(['Hello World']);
+
+/** Create User */
+routes.post(
+  '/session/signup',
+  // Validation
+  body('email')
+    .trim()
+    .isEmail()
+    .notEmpty()
+    .escape()
+    .custom(value => User.findOne({ email: value }).then(user => (user ? Promise.reject('Email address already exists') : Promise.resolve())))
+    .normalizeEmail(),
+  body('password').trim().isLength({ min: 6 }).notEmpty().escape(),
+  (req, res, next) => {
+    // Check errors
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      res.status(400).json({ errors: errors.array() });
+    }
+
+    // Has pwd
+    return hash(req.body.password, 12)
+      .then(hashedPwd => {
+        const userNew: IUser = {
+          email: req.body.email,
+          password: hashedPwd,
+          role: 'user',
+          // todos: [],
+        };
+
+        // Create new user
+        const newUser = new User(userNew);
+        // Save new user, return userId
+        return newUser
+          .save()
+          .then(savedUser => res.status(201).json({ _id: savedUser._id }))
+          .catch(err => next(err));
+      })
+      .catch(err => next(err));
+  },
+);
+
+/** Log in */
+routes.post('/session/login', (req, res, next) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  let loadedUser: IUser | null;
+  User.findOne({ email: email })
+    .then(user => {
+      if (!user) {
+        res.status(401).json({ errors: 'That username and password combination does not exist' });
+        return;
+      }
+      loadedUser = user;
+      return compare(password, user.password);
+    })
+    .then(isEqual => {
+      if (!isEqual) {
+        res.status(401).json({ errors: 'That username and password combination does not exist' });
+        return;
+      }
+      const token = sign({ email, id: loadedUser?._id?.toString() }, 'secret');
+    })
+    .catch(err => next(err));
 });
 
-routes.post('/session', body('username').trim().escape().isLength({ min: 5 }), body('password').trim().escape().isLength({ min: 5 }), (req, res) => {
-  const errors = validationResult(req);
-
-  // Has errors
-  if (!errors.isEmpty()) {
-    // const error = new Error('That username and password combination is incorrect');
-    // error.stack = errors.toString();
-    // error.statusCode = 422;
-    // throw error;
-    return res.status(422).json({ message: 'Unable to log in with that username and password combination', ...errors });
-  }
-
-  return res.json(['Hello World']);
-});
+routes.post('/session/logout', (req, res) => {});
 
 export const sessionRoute = routes;
