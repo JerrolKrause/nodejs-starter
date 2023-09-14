@@ -1,13 +1,13 @@
 {
 	"info": {
-		"_postman_id": "a6a09c47-be9f-46b2-9559-65eecdb9e1e9",
+		"_postman_id": "54729378-65b9-438b-9e26-da6cecfa7158",
 		"name": "NodeJS Starter",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
 		"_exporter_id": "5171682"
 	},
 	"item": [
 		{
-			"name": "GET all",
+			"name": "GET All",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -27,7 +27,48 @@
 			"response": []
 		},
 		{
-			"name": "GET one",
+			"name": "GET Paging",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "localhost:3000/api/v1/todo/paging?page=2&limit=2",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"todo",
+						"paging"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
+							"key": "limit",
+							"value": "2"
+						},
+						{
+							"key": "sortProp",
+							"value": "title",
+							"disabled": true
+						},
+						{
+							"key": "sortOrder",
+							"value": "DESC",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET One",
 			"request": {
 				"method": "GET",
 				"header": [],
@@ -179,8 +220,30 @@
 		{
 			"name": "File Upload",
 			"request": {
-				"method": "GET",
-				"header": []
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/@Projects/Ntersol/nodejs-starter/public/json/test.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "localhost:3000/api/v1/upload",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"api",
+						"v1",
+						"upload"
+					]
+				}
 			},
 			"response": []
 		}

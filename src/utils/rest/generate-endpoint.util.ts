@@ -29,6 +29,15 @@ export interface GenerateRestApiModel<SchemaModel> {
   model: mongoose.Model<SchemaModel, {}, {}>;
 }
 
+interface PagedResponse<T> {
+  totalRecords: number;
+  page: number;
+  limit: number;
+  results: T[];
+  sortProp?: string | null;
+  sortOrder?: string | null;
+}
+
 type RequestParams<PrimaryKey extends string> = {
   [key in PrimaryKey]: string;
 };
@@ -83,17 +92,17 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
     const convert2Num = (val?: unknown) => (val ? Number(val) : null);
 
     // Paging values
-    const page = convert2Num(req.query?.['page']) ?? null;
+    const page = convert2Num(req.query?.['page']) ?? 1;
     const limit = convert2Num(req.query?.['limit']) ?? 20;
     const sortProp = (req.query?.['sortProp'] as string) ?? null;
-    const sortOrder = (req.query?.['order'] as string) ?? 'ASC';
-    let total = 0;
+    const sortOrder = (req.query?.['sortOrder'] as string) ?? 'ASC';
+    let totalRecords = 0;
 
     // Paging specified, return paged results
     options.model
       .countDocuments()
       .then((count: number) => {
-        total = count;
+        totalRecords = count;
         const query = options.model.find({});
 
         if (page && limit) {
@@ -106,15 +115,25 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
 
         return query.exec();
       })
-      .then((results: any[]) => {
-        res.json({
-          total,
+      .then(results => {
+        // Set up default response
+        const response: PagedResponse<unknown> = {
+          totalRecords,
           page,
           limit,
-          sortProp,
-          sortOrder,
           results,
-        });
+        };
+
+        // If sort prop and order are present, add to response
+        if (sortProp !== null && sortProp !== undefined) {
+          response.sortProp = sortProp;
+        }
+
+        if (response.sortProp && sortOrder !== null && sortOrder !== undefined) {
+          response.sortOrder = sortOrder;
+        }
+
+        res.json(response);
       })
       .catch((err: any) => next(err));
   });
