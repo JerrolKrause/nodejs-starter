@@ -9,7 +9,7 @@ import 'tsconfig-paths/register';
 
 import { globalErrorHandler, initializeFiles, writeErrorToLog } from '$utils';
 
-import { environment } from './env/environment';
+import { Env } from '$models';
 import { restRoutes, sessionRoute, uploadRoute, userRoute } from './routes';
 
 // Check for the existence of startup files, create if not found
@@ -21,11 +21,17 @@ const envPath = process.env['ENV_PATH'] || 'src/env/.env.development'; // Fallba
 dotenv.config({ path: envPath });
 
 // Extract typesafe environment variables from node process
-const env = environment(process.env);
-// Is on prod env
-const isProd = env.env === 'production';
+export const environment: Env = {
+  path: process.env['ENV_PATH'] || 'src/env/.env.development',
+  env: (process.env['NODE_ENV'] as 'dev' | 'production') || 'dev',
+  dbConnectionString: process.env['DB_CONNECTION_STRING'] ?? null,
+  tokenSecret: process.env['TOKEN_SECRET'] ?? null,
+};
 
-if (!env.dbConnectionString) {
+// Is on prod env
+const isProd = environment.env === 'production';
+
+if (!environment.dbConnectionString) {
   console.error('DB connection string not found');
 }
 
@@ -109,7 +115,7 @@ mongoose.connection.on('disconnected', () => console.error('MongoDB disconnected
 
 // Connect to DB and start server
 mongoose
-  .connect(env.dbConnectionString ?? '', {
+  .connect(environment.dbConnectionString ?? '', {
     useNewUrlParser: true,
     useUnifiedTopology: true, // Automaically trys to reconnect
   })
