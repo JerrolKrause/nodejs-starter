@@ -23,7 +23,7 @@ routes.post(
     .escape()
     .custom(value => User.findOne({ email: value }).then(user => (user ? Promise.reject('Email address already exists') : Promise.resolve())))
     .normalizeEmail(),
-  body('password').trim().isLength({ min: 6 }).notEmpty().escape(),
+  body('password').trim().escape().isLength({ min: 6 }).notEmpty().escape(),
   (req, res, next) => {
     // Check errors
     const errors = validationResult(req);
