@@ -3,6 +3,7 @@ import { compare, hash } from 'bcryptjs';
 import { Router } from 'express';
 import { body, validationResult } from 'express-validator';
 import { sign } from 'jsonwebtoken';
+import { environment } from '../app';
 
 export interface Session {
   username: string;
@@ -27,7 +28,7 @@ routes.post(
     // Check errors
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: errors.array() });
     }
 
     // Has pwd
@@ -68,13 +69,18 @@ routes.post('/session/login', (req, res, next) => {
     })
     .then(isEqual => {
       if (!isEqual) {
-        res.status(401).json({ errors: 'That username and password combination does not exist' });
-        return;
+        return res.status(401).json({ errors: 'That username and password combination does not exist' });
       }
-      const token = sign({ email, id: loadedUser?._id?.toString() }, 'secret');
+      if (!environment.tokenSecret) {
+        return res.status(500).json({ errors: 'Token management configured wrong' });
+      }
+      const token = sign({ email, id: loadedUser?._id?.toString() }, environment.tokenSecret, { expiresIn: '1h' });
+      return res.status(200).json({ token, userId: loadedUser?._id });
     })
     .catch(err => next(err));
 });
+
+routes.post('/session/refresh', (req, res) => {});
 
 routes.post('/session/logout', (req, res) => {});
 
