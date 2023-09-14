@@ -70,13 +70,53 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   const pk = String(options.primaryKey);
 
   /** GET All */
-  routes.get(options.path, async (_req, res, next) => {
-    try {
-      const model = await options.model.find({});
-      res.json(model);
-    } catch (err) {
-      next(err);
-    }
+  routes.get(options.path, (_req, res, next) => {
+    options.model
+      .find({})
+      .then(model => res.json(model))
+      .catch(err => next(err));
+  });
+
+  /** GET with paging */
+  routes.get(options.path + `/paging`, (req, res, next) => {
+    // Ensure number
+    const convert2Num = (val?: unknown) => (val ? Number(val) : null);
+
+    // Paging values
+    const page = convert2Num(req.query?.['page']) ?? null;
+    const limit = convert2Num(req.query?.['limit']) ?? 20;
+    const sortProp = (req.query?.['sortProp'] as string) ?? null;
+    const sortOrder = (req.query?.['order'] as string) ?? 'ASC';
+    let total = 0;
+
+    // Paging specified, return paged results
+    options.model
+      .countDocuments()
+      .then((count: number) => {
+        total = count;
+        const query = options.model.find({});
+
+        if (page && limit) {
+          query.skip((page - 1) * limit).limit(limit);
+        }
+
+        if (sortProp) {
+          query.sort({ [sortProp]: sortOrder.toUpperCase() === 'ASC' ? 1 : -1 });
+        }
+
+        return query.exec();
+      })
+      .then((results: any[]) => {
+        res.json({
+          total,
+          page,
+          limit,
+          sortProp,
+          sortOrder,
+          results,
+        });
+      })
+      .catch((err: any) => next(err));
   });
 
   // GET One
