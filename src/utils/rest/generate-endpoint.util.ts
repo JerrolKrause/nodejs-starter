@@ -95,26 +95,28 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
       .catch((err: any) => next(err));
   });
 
-  // GET One
-  routes.get(`${options.path}/:${pk}`, async (req, res, next) => {
+  /** GET One */
+  routes.get(`${options.path}/:${pk}`, (req, res, next) => {
     const id = req.params[pk];
-    try {
-      const model = await options.model.findById(id);
-      if (!model) {
-        res.status(404).json({ message: 'Entity not found' });
-      } else {
-        res.json(model);
-      }
-    } catch (err) {
-      next(err);
-    }
+
+    options.model
+      .findById(id)
+      .then(model => {
+        if (!model) {
+          res.status(404).json({ message: 'Model not found' });
+        } else {
+          res.json(model);
+        }
+      })
+      .catch(err => next(err));
   });
 
   /** POST */
   routes.post(options.path, (req: Request<{}, {}, {}>, res, next) => {
+    // Check if parentID is specified, if so extract it from the request body
     const parentId = extractParentId(req, options.parentIdProperty);
+    // Merge parentId into model if found
     const body = parentId ? { ...req.body, [options.parentIdProperty]: parentId } : req.body;
-    console.log('userId', body);
     const newModel = new options.model(body);
     newModel.save(err => {
       if (err) return next(err);
@@ -125,9 +127,13 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** PUT */
   routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res, next) => {
     const id = req.params[pk];
-    options.model.findByIdAndUpdate(id, req.body, { new: true }, (err, model) => {
+    // Check if parentID is specified, if so extract it from the request body
+    const parentId = extractParentId(req, options.parentIdProperty);
+    // Merge parentId into model if found
+    const body = parentId ? { ...req.body, [options.parentIdProperty]: parentId } : req.body;
+    options.model.findByIdAndUpdate(id, body, { new: true }, (err, model) => {
       if (err) return next(err);
-      else if (!model) res.status(404).json({ message: 'Entity not found' });
+      else if (!model) res.status(404).json({ message: 'Model not found' });
       else res.send();
     });
   });
