@@ -127,27 +127,38 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
   /** PUT */
   routes.put(`${options.path}/:${pk}`, (req: Request<RequestParams<string>, {}, {}>, res, next) => {
     const id = req.params[pk];
-    // Check if parentID is specified, if so extract it from the request body
+
+    // Always extract parentId from the token so it cannot be modified from the frontend.
     const parentId = extractParentId(req, options.parentIdProperty);
-    // Merge parentId into model if found
-    // Always extract from token so the FE cannot modify this property
-    const body = parentId ? { ...req.body, [options.parentIdProperty]: parentId } : req.body;
-    options.model
+
+    // Exit early if id is not provided
+    if (!id) {
+      return res.status(400).json({ message: 'Invalid id' });
+    }
+
+    return options.model
       .findById(id)
       .then(model => {
-        // If model to update not found, throw error
+        // Exit early if model is not found
         if (!model) {
-          res.status(404).json({ message: 'Model not found' });
-          return;
-          // If parentID is specified, confirm that this model belongs to that parent before allowing a save
-        } else if (parentId && parentId !== model?.get(String(options.parentIdProperty))?.toString()) {
-          res.status(401).json({ message: 'Saving not allowed' });
-          return;
+          return res.status(404).json({ message: 'Model not found' });
         }
-        return model;
+
+        // Validate parent ID if required
+        if (parentId) {
+          const currentParentId = model.get(String(options.parentIdProperty))?.toString();
+          if (parentId !== currentParentId) {
+            return res.status(403).json({ message: 'Unauthorized operation' });
+          }
+        }
+
+        // Prepare body with parentId if exists
+        const body = parentId ? { ...req.body, [options.parentIdProperty]: parentId } : req.body;
+
+        // Update model and return
+        return model.updateOne(body);
       })
-      .then(model => model?.update(body)) // Perform update
-      .then(() => res.send()) //
+      .then(() => res.status(200).json({ message: 'Model updated successfully' }))
       .catch(err => next(err));
   });
 
