@@ -7,9 +7,9 @@ import swaggerJsdoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import 'tsconfig-paths/register';
 
-import { globalErrorHandler, initializeFiles, writeErrorToLog } from '$utils';
-
+import { isAuth } from '$middleware';
 import { Env } from '$models';
+import { globalErrorHandler, initializeFiles, writeErrorToLog } from '$utils';
 import { restRoutes, sessionRoute, uploadRoute, userRoute } from './routes';
 
 // Check for the existence of startup files, create if not found
@@ -74,11 +74,13 @@ app.use(express.static('public'));
 // Parse body responses as JSON
 app.use(express.json());
 
+app.use('/api/v1', sessionRoute); // Session. Must be first
+
 // Dynamically generated REST routes
-restRoutes.forEach(r => app.use('/api/v1', r));
+restRoutes.forEach(r => app.use('/api/v1', isAuth, r));
 
 // Static routes
-app.use('/api/v1', sessionRoute); // Session
+
 app.use('/api/v1', userRoute); // User management
 app.use('/api/v1', uploadRoute); // File Uploads
 

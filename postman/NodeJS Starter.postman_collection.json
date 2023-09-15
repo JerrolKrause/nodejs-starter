@@ -213,7 +213,17 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.environment.set(\"auth_token\", pm.response.json().token);"
+									"// Assign token to postman variable\r",
+									"pm.collectionVariables.set(\"auth_token\", pm.response.json().token);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -348,6 +358,13 @@
 					""
 				]
 			}
+		}
+	],
+	"variable": [
+		{
+			"key": "auth_token",
+			"value": "Test",
+			"type": "string"
 		}
 	]
 }

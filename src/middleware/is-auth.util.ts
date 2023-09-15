@@ -10,30 +10,40 @@ declare global {
     }
   }
 }
+
 /**
  * Middleware to check if the user is authenticated.
  *
- * @param {Request} req - Express request object
- * @param {Response} res - Express response object
- * @param {NextFunction} next - Express next middleware function
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next middleware function
  */
 export const isAuth = (req: Request, res: Response, next: NextFunction): void => {
   const token = req.get('Authorization')?.split(' ')[1];
-  let decodedToken: JwtPayload | string;
+
   if (!token || !environment.tokenSecret) {
-    throw res.status(500).json({ errors: 'Missing important stuff' });
+    res.status(500).json({ errors: 'Internal server error. Configuration is missing.' });
+    return;
   }
+
+  let decodedToken: JwtPayload | string;
   try {
     decodedToken = verify(token, environment.tokenSecret);
   } catch (err) {
-    throw res.status(500).json({ errors: err });
+    res.status(401).json({ errors: 'Unauthorized. Invalid token.' });
+    return;
   }
+
   if (!decodedToken) {
-    throw res.status(401).json({ errors: 'Not authenticated' });
+    res.status(401).json({ errors: 'Unauthorized. Invalid token.' });
+    return;
   }
+
   if (typeof decodedToken === 'string') {
-    throw res.status(500).json({ errors: 'Token problems' });
+    res.status(500).json({ errors: 'Internal server error. Token validation failed.' });
+    return;
   }
+
   req.userId = decodedToken['userId'];
 
   next();
