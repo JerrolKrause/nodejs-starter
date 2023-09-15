@@ -74,15 +74,17 @@ app.use(express.static('public'));
 // Parse body responses as JSON
 app.use(express.json());
 
-app.use('/api/v1', sessionRoute); // Session. Must be first
+// Base path for API. Versioned for future proofing
+const apiSlug = '/api/v1';
+
+app.use(apiSlug, sessionRoute); // Session. Must be first
 
 // Dynamically generated REST routes
-restRoutes.forEach(r => app.use('/api/v1', isAuth, r));
+restRoutes.forEach(r => app.use(apiSlug, isAuth, r));
 
 // Static routes
-
-app.use('/api/v1', userRoute); // User management
-app.use('/api/v1', uploadRoute); // File Uploads
+app.use(apiSlug, isAuth, userRoute); // User management
+app.use(apiSlug, isAuth, uploadRoute); // File Uploads
 
 // Dev only routes
 if (!isProd) {
@@ -108,7 +110,7 @@ app.use((_req, res) => res.status(404).json({ message: 'Resource not found' }));
 app.use(globalErrorHandler);
 
 // Handle events for the Mongoose connection
-mongoose.connection.on('connected', () => console.log('MongoDB connected'));
+mongoose.connection.on('connected', () => console.log('Application started successfully'));
 mongoose.connection.on('error', err => {
   console.error('MongoDB connection error:', err);
   writeErrorToLog(err);

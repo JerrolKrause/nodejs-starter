@@ -36,6 +36,7 @@ export interface ITodo extends Document {
   description?: string;
   completed?: boolean;
   dueDate?: Date;
+  userId: string;
 }
 
 /**
@@ -46,6 +47,11 @@ const todoSchema: Schema = new Schema({
   description: { type: String },
   completed: { type: Boolean, default: false },
   dueDate: { type: Date },
+  userId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
 });
 
 /**

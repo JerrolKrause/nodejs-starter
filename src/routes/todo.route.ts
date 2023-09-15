@@ -1,5 +1,5 @@
 import { Todo } from '$models';
-import { generateRestOptions } from '../utils/rest/generate-endpoint.util';
+import { generateRestOptions } from '$utils';
 
 /**
  * @swagger
@@ -134,4 +134,6 @@ export const todoRoutes = generateRestOptions({
   path: '/todo',
   primaryKey: '_id',
   model: Todo,
+  isAuth: true,
+  parentIdProperty: 'userId',
 });
