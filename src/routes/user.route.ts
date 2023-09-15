@@ -29,7 +29,6 @@ routes.post(
       email: req.body.email,
       password: req.body.password,
       role: 'user',
-      // todos: [],
     };
 
     const newUser = new User(userParams);

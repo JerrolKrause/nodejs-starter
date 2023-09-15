@@ -41,12 +41,6 @@ const userSchema: Schema = new Schema({
   email: { type: String, required: true },
   password: { type: String, required: true, minlength: 6 },
   role: { type: String, required: true },
-  /**
-  todos: {
-    type: Schema.Types.ObjectId,
-    ref: 'Todo',
-  },
-  */
 });
 
 /**

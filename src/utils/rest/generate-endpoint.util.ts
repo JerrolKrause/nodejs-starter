@@ -1,5 +1,5 @@
 import { Request, Router } from 'express';
-import { extractParentId } from './extract-parentid.util';
+import { extractParentId } from './generate-api-utils.util';
 import { GenerateRestApiModel } from './generate-endpoint-model.util';
 
 interface PagedResponse<T> {
@@ -16,7 +16,7 @@ type RequestParams<PrimaryKey extends string> = {
 };
 
 /**
- * Generates RESTful endpoints for a given schema model, including GET, POST, PUT, and DELETE operations.
+ * Generates RESTful endpoints for a given schema model, including GET, GET One, GET with Paging, POST, PUT, and DELETE operations.
  *
  * @template SchemaModel The Mongoose schema model type used to define the structure of the documents within the collection. This must extend an object.
  * @param {GenerateRestApiModel<SchemaModel>} options An object containing the necessary options to generate the REST API.
@@ -43,7 +43,7 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
       .catch(err => next(err));
   });
 
-  /** GET with paging */
+  /** GET With Paging */
   routes.get(options.path + `/paging`, (req, res, next) => {
     // Ensure number
     const convert2Num = (val?: unknown) => (val ? Number(val) : null);
@@ -130,12 +130,25 @@ export const generateRestEndpoint = <SchemaModel extends object>(options: Genera
     // Check if parentID is specified, if so extract it from the request body
     const parentId = extractParentId(req, options.parentIdProperty);
     // Merge parentId into model if found
+    // Always extract from token so the FE cannot modify this property
     const body = parentId ? { ...req.body, [options.parentIdProperty]: parentId } : req.body;
-    options.model.findByIdAndUpdate(id, body, { new: true }, (err, model) => {
-      if (err) return next(err);
-      else if (!model) res.status(404).json({ message: 'Model not found' });
-      else res.send();
-    });
+    options.model
+      .findById(id)
+      .then(model => {
+        // If model to update not found, throw error
+        if (!model) {
+          res.status(404).json({ message: 'Model not found' });
+          return;
+          // If parentID is specified, confirm that this model belongs to that parent before allowing a save
+        } else if (parentId && parentId !== model?.get(String(options.parentIdProperty))?.toString()) {
+          res.status(401).json({ message: 'Saving not allowed' });
+          return;
+        }
+        return model;
+      })
+      .then(model => model?.update(body)) // Perform update
+      .then(() => res.send()) //
+      .catch(err => next(err));
   });
 
   /** DELETE */
