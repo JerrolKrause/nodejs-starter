@@ -31,7 +31,7 @@ export const environment: Env = {
 // Is on prod env
 const isProd = environment.env === 'production';
 
-if (!environment.dbConnectionString) {
+if (!environment.dbConnectionString || environment.dbConnectionString === 'your-connection-string') {
   console.error('DB connection string not found');
 }
 
