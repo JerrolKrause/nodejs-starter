@@ -61,7 +61,11 @@ app.use((_req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*'); // Allow access from this domain. Change wildcard to improve security
   res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, PATCH, DELETE'); // Allow these methods
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization'); // Allow these additional headers
-  next();
+  // Handle preflight requests for CORS
+  if (_req.method === 'OPTIONS') {
+    return res.sendStatus(200); // Send OK status for preflight requests
+  }
+  return next();
 });
 
 // Content Security Policy setup. Has to be before any routes
